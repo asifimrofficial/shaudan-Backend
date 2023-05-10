@@ -32,8 +32,7 @@ const addressSchema = new mongoose.Schema({
     },
     location: {
         type:mongoose.Schema.Types.ObjectId,
-        ref: 'Location',
-        required: true,
+        ref: 'Location'
     },
 });
 

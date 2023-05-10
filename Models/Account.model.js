@@ -12,6 +12,7 @@ hashedPassword: {
 },
 salt: { 
     type: String,
+    required:true
 },
 lockOutTime: {
     type: Date,

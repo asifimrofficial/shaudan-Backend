@@ -7,11 +7,12 @@ module.exports={
     signAccessToken:(userId)=>{
         return new Promise((resolve,reject)=>{
             const payload={
-            
+            userId: userId,
+            role: userId.role,
             }
             const secret =  process.env.ACCESS_TOKEN_SECRET;
             const options={
-                expiresIn: "2m",
+                expiresIn: "2d",
                 issuer: "shaudan.com",
                 audience: userId
             }
@@ -46,7 +47,7 @@ module.exports={
             next();
         })
     },
-    signRefreshToken:(userId)=>{
+    signRefreshToken:(userId)=>{ 
         return new Promise((resolve,reject)=>{
             const payload={
             

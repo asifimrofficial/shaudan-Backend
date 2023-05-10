@@ -11,7 +11,7 @@ const productSchema = new mongoose.Schema({
         required: true,
     },
     price: {
-        type:mongoos.Schema.Types.ObjectId,
+        type:mongoose.Schema.Types.ObjectId,
         ref: 'Price',
         required: true,
     },
@@ -22,9 +22,17 @@ const productSchema = new mongoose.Schema({
     description: {
         type: String,
     },
-    image: {
+    images: [
+        {
         type: String,
-    },
-},Timestamps);
+        required:true
+    }],
+    tags:[
+        {
+            type: String,
+            required: true
+        }
+    ]
+}, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);

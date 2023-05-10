@@ -5,11 +5,13 @@ const contactSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    socialMedia: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'SocialMedia',
-        required: true,
-    },
+    socialMedia: [{
+        type:String,
+       required: true
+    }
+    ]
+        
+   
 
 });
 

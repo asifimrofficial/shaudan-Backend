@@ -1,18 +1,19 @@
 const mongoose = require('mongoose');
 const cryptojs = require('crypto-js');
 
-const userSchema = new mongoose.Schema({
+const storeSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
     },
-    age: {
-        type: Number,
+    about: {
+        type: String,
     },
-    account: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Account',
-        required: true,
+    coverPic: {
+        type: String,
+    },
+    logo: {
+        type: String,
     },
     address: {
         type:mongoose.Schema.Types.ObjectId,
@@ -24,19 +25,23 @@ const userSchema = new mongoose.Schema({
         ref: 'Contact',
         required: true,
     },
-    CNIC: {
+    owner: {
+        type:mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
+    status: {
         type: String,
         required: true,
     },
-    DOB: {
-        type: Date,
-        required: true,
-    },
-    role: {
+    storeType: {
         type: String,
         required: true,
+    },
+    reviews: {
+        type:mongoose.Schema.Types.ObjectId,
+        ref: 'Review',
     }
 }, {timestamps: true});
 
-
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('Store', storeSchema);

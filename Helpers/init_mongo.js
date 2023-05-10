@@ -23,5 +23,11 @@ mongoose.connection.on('disconnected', ()=>{
 });
 process.on('SIGINT', async ()=>{
     await mongoose.connection.close();
+    console.log('Mongoose connection is disconnected due to app termination');
+    process.exit(0);
+});
+process.on('SIGTERM', async ()=>{
+    await mongoose.connection.close();
+    console.log('Mongoose connection is disconnected due to app sigterm termination');
     process.exit(0);
 });
