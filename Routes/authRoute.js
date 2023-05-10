@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const createError=require('http-errors')
-const Account= require('../Models/Account');
+const Account= require('../Models/Account.model');
 const {authSchema}= require('../Helpers/validationSchema');
 const {signAccessToken,signRefreshToken,verfiyRefreshToken}= require('../Helpers/jwtHelper');
 const cryptojs = require('crypto-js');
@@ -11,13 +11,14 @@ router.get('/get',async (req,res,next)=>{
 res.send('hi from get');
 })
 
-router.post('/register', async (req, res,next)=>{
+router.post('/signup', async (req, res,next)=>{
     try {
         const result = await authSchema.validateAsync(req.body)
         const doesExist= await Account.findOne({email: result.email})
         if(doesExist){
             throw createError.Conflict(`${email} is already registered`)
         }
+        else{
         
         const account= new Account(result);
 
@@ -25,6 +26,7 @@ router.post('/register', async (req, res,next)=>{
         const refreshToken= await signRefreshToken(savedAccount.id);
         const accessToken = await signAccessToken(savedAccount.id);
         res.send({accessToken,refreshToken});
+        }
     } catch (error) {
         if(error.isJoi== true) error.status=422;
         next(error)
