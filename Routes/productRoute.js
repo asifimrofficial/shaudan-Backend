@@ -3,6 +3,16 @@ const router = express.Router();
 const Product = require('../Models/Product.model');
 const createError = require('http-errors');
 
+router.get('/', async (req, res, next) => {
+    try {
+        const productList = await Product.findById();
+        if (!productList) { throw createError.NotFound('Product not found') }
+        res.status(200).send(productList);
+    } catch (error) {
+        next(error);
+    }
+
+});
 router.get('/:id', async (req, res, next) => {
     try {
         const product = await Product.findById(req.params.id);

@@ -9,4 +9,4 @@ const wholeSalerSchema = new mongoose.Schema({
 }, {timestamps: true}
 );
 
-module.exports = mongoose.model('WholeSaler', wholeSalerSchema);
+module.exports = mongoose.model('Retailer', wholeSalerSchema);

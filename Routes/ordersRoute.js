@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const Order = require('../Models/Order.model');
+const OrderItem = require('../Models/OrderItems.model');
 const createError = require('http-errors');
 
 router.get('/', async (req, res, next) => {
     try {
-        const orderList = await Order.findById(req.params.id);
+        const orderList = await Order.find();
         if (!orderList) { throw createError.NotFound('Orders not found') }
         res.status(200).send(orderList);
     } catch (error) {
@@ -14,7 +15,7 @@ router.get('/', async (req, res, next) => {
 });
 router.get('/:id', async (req, res, next) => {
     try {
-        const order = await Order.findById(req.params.id);
+        const order = await Order.findById(req.params.id).populate('orderItems').populate('shippingAddress').populate('billingAddress').populate('retailer').populate('contact');
         if (!order) { throw createError.NotFound('Order not found') }
         res.status(200).send(order);
     } catch (error) {
@@ -24,14 +25,27 @@ router.get('/:id', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
     try {
-       
+            const orderItems = Promise.all(req.body.orderItems.map(async (orderItem) => {
+                const newOrderItem = new OrderItem({
+                    quantity: orderItem.quantity,
+                    product: orderItem.product
+                }); 
+                const savedOrderItem = await newOrderItem.save();
+                console.log(`${savedOrderItem}`);
+                if (!savedOrderItem) { throw createError[400]("OrderItem not saved to database") }
+                return savedOrderItem._id;
+            }));
+                const orderItemsIdsResolved = await orderItems;
+
             const order = new Order({
-                orderItems: req.body.orderItems,
+                orderItems: orderItemsIdsResolved, 
                 shippingAddress: req.body.address,
-                billingAddressshippingAddress: req.body.address,
+                billingAddress: req.body.address,
                 contact : req.body.contact,
-                
-               socialMedia: req.body.socialMedia
+                totalAmmount: req.body.totalAmmount,
+                paymentMethod: req.body.paymentMethod,
+                orderStatus: req.body.orderStatus,
+                deliveryCharges: req.body.deliveryCharges
             });
 
             const savedContact = await order.save();
@@ -77,3 +91,4 @@ router.delete('/:id', async (req, res, next) => {
 });
 
 module.exports = router;
+

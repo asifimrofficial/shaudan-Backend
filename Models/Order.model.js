@@ -4,7 +4,7 @@ const orderSchema = new mongoose.Schema({
     orderItems: [{
         type: mongoose.Schema.Types.ObjectId,
         ref:"OrderItem",
-        required: true,
+       // required: true,
     }],
     shippingAddress:{
         type:mongoose.Schema.Types.ObjectId,
@@ -14,20 +14,25 @@ const orderSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"Address",
     },
-    
+    retailer:{  
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Retailer",
+       // required:true
+    },
+
     contact:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Contact",
-        required:true
+       // required:true
     },
     totalAmmount:{
         type:Number,
-        required:true,
+      //  required:true,
         default:0
     },
     paymentMethod:{
         type:String,
-        required:true,
+     //   required:true,
         default:"Cash On Delivery"
     },
     deliveryCharges:
@@ -42,8 +47,18 @@ const orderSchema = new mongoose.Schema({
     },
     
         
-   
+    
 
+}
+, {timestamps: true});
+
+orderSchema.virtual('id').get(function () {
+    return this._id.toHexString();
 });
+
+orderSchema.set('toJSON', {
+    virtuals: true,
+});
+
 
 module.exports = mongoose.model('Order', orderSchema);

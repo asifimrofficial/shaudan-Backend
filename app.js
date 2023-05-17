@@ -8,7 +8,7 @@ const addressRoute= require('./Routes/addressRoute');
 const contactRoute = require('./Routes/contactRoute')
 const locationRoute = require('./Routes/locationRoute')
 const productRoute = require('./Routes/productRoute')
-
+const orderRoute = require('./Routes/ordersRoute')
 require('./Helpers/init_mongo');
 const {verifyAccessToken}= require('./Helpers/jwtHelper')
 
@@ -30,6 +30,7 @@ app.use('/user', userRoute);
 app.use('/contact',contactRoute);
 app.use('/location',locationRoute)
 app.use('/product',productRoute);
+ app.use('/order',orderRoute);
 //error handler middleware
 app.use((err, req, res, next)=>{
     res.status(err.status || 500)
