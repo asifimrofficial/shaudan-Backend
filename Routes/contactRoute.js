@@ -15,6 +15,7 @@ router.get('/:id', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
     try {
+        console.log(req.body.phoneNumber);
         const doesExist = await Contact.findOne({ phoneNumber: req.body.phoneNumber })
         console.log(`${doesExist}`);
         if (doesExist) {

@@ -41,9 +41,6 @@ module.exports={
                 }else{
                 return next(createError.Unauthorized(err.message))}
             }
-
-            req.payload= payload
-            console.log(payload);
             next();
         })
     },

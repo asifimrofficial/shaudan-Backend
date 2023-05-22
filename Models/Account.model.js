@@ -36,19 +36,17 @@ accountSchema.pre('save', async function(next){
         
         const Password = cryptojs.AES.encrypt(this.password,this.salt);
         this.hashedPassword = Password;
+        console.log(this.hashedPassword);
         next();
     } catch (error) {
+        console.log(error+"error in pre save");
         next(error);
     }
 });
 accountSchema.methods.isValidPassword = async function(newPassword){
     try {
-        console.log(this.hashedPassword);
-        console.log(this.salt);
-
-        // const Password = cryptojs.AES.decrypt("U2FsdGVkX18ASnsRB8dko/fi5eXHWWXcZRXJ1vHbews=" ,"1122");
-       // console.log(`Password: ${Password}`);
-        return Password === newPassword;
+       if(this.hashedPassword == newPassword)
+        return true;
     } catch (error) {
         throw new Error(error)
     }

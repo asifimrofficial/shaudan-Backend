@@ -8,26 +8,27 @@ const productSchema = new mongoose.Schema({
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
-        required: true,
+        // required: true,
     },
     price: {
-        type:mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Price',
-        required: true,
+        // required: true,
     },
     quantity: {
         type: Number,
-        required: true,
+        // required: true,
     },
     description: {
         type: String,
     },
     images: [
         {
-        type: String,
-        required:true
-    }],
-    tags:[
+            url: String,
+            public_id: String
+        }
+    ],
+    tags: [
         {
             type: String,
             required: true

@@ -1,8 +1,8 @@
 const express = require('express');
 const router= express.Router();
-const User= require('../Models/User.model');
+const User= require('../Models/Adress.model');
 const createError=require('http-errors')
-
+const ageCalculator = require('../Helpers/ageCalculator');
 router.get('/:id',async(req,res,next)=>{
     try {       
         const user= await User.findById(req.params.id).populate('account');;
@@ -18,26 +18,27 @@ router.get('/:id',async(req,res,next)=>{
 
 router.post('/postUser',async(req,res,next)=>{
     try {
-       const oldUser= User.findOne({CNIC: req.body.CNIC});
-       if(!oldUser){
+
+
+        const age = ageCalculator(req.body.DOB);
+
         const user = new User({
            name:req.body.name,
-           age:req.body.age,
+           age:age,
            account:req.body.account,
            address: req.body.address,
-           CNIC:req.body.CNIC,
+           contact:req.body.contact,
            DOB:req.body.DOB,
            role:req.body.role,
         });
+
         const savedUser= await user.save();
         if(!savedUser)
         {
             throw createError[500]('User not saved');
         }
         res.send(user);
-    }else{
-        throw createError.Conflict('User already exits with the same CNIC');
-    }
+  
     } catch (error) {
      next(error);   
     }
@@ -67,7 +68,6 @@ router.put('/:id',async(req,res,next)=>{
                 age:req.body.age,
                 account:req.body.account,
                 address: req.body.address,
-                CNIC:req.body.CNIC,
                 DOB:req.body.DOB,   
             },{new:true}
         )

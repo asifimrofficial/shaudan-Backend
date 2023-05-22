@@ -1,13 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../Models/Product.model');
+const Price = require('../Models/Price.model');
 const createError = require('http-errors');
-
+const {verifyAccessToken} = require('../Helpers/jwtHelper');
+const {uploads}=require('../utils/cloudinary');
+const uploadImages=require('../utils/imageUploader');
+const upload=require('../utils/multer');
 router.get('/', async (req, res, next) => {
     try {
-        const productList = await Product.findById();
+        const productList = await Product.find();
         if (!productList) { throw createError.NotFound('Product not found') }
-        res.status(200).send(productList);
+        res.status(200).send({message: "success",productList});
     } catch (error) {
         next(error);
     }
@@ -15,7 +19,7 @@ router.get('/', async (req, res, next) => {
 });
 router.get('/:id', async (req, res, next) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const product = await Product.findById(req.params.id).populate('price');
         if (!product) { throw createError.NotFound('Product not found') }
         res.status(200).send(product);
     } catch (error) {
@@ -25,25 +29,39 @@ router.get('/:id', async (req, res, next) => {
 });
 router.get('/', async (req, res, next) => {
     try {
-        const product = await Product.find();
-        if (!product) { throw createError.NotFound('Product not found') }
-        res.status(200).send(product);
+        const product = await Product.find().populate('price');
+        if (!product) { throw createError.NotFound('Products not found') }
+        res.status(200).send(product);``
     } catch (error) {
         next(error);
     }
 
 });
 
-router.post('/post', async (req, res, next) => {
+router.post('/post' ,upload.array('image', 2),async (req, res, next) => {
     try {
+        const files = req.files;
+        const uploadedImages = await uploadImages(files);
 
+        const priceobject= req.body.price;
+        const priceitem = new Price({
+            "price": priceobject.price,
+            "startDate": priceobject.startDate,
+            "endDate": priceobject.endDate,
+        });
+        const savedPriceItem= await priceitem.save();
+        console.log(`${savedPriceItem}`);
+        if (!savedPriceItem||!savedPriceItem) { throw createError[400]("Error occur while saving Price item or Images") }
+       else{
+            
         const product = new Product({
             "name": req.body.name,
+            "name":"abcef",
             "category": req.body.category,
-            "price": req.body.price,
+           //"price": savedPriceItem._id,
             "quantity": req.body.quantity,
             "description": req.body.description,
-            "images": req.body.images,
+            "images": uploadedImages,
             "tags": req.body.tags
 
         });
@@ -51,12 +69,14 @@ router.post('/post', async (req, res, next) => {
         const savedProduct = await product.save();
         if (!savedProduct) { throw createError[400]("Product not saved to database") }
         res.status(200).send(savedProduct);
+   }
     } catch (error) {
         next(error);
     }
 });
 router.put('/:id', async (req, res, next) => {
     try {
+        
         const product = await Product.findByIdAndUpdate(
             req.params.id
             ,

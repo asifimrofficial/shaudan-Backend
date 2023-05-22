@@ -2,15 +2,15 @@ const mongoose= require("mongoose");
 const priceSchema= new mongoose.Schema({
     price:{
         type:Number,
-        required:true
+        // required:true
     },
     startDate:{
         type:Date,
-        required:true
+        // required:true
     },
     endDate:{
         type:Date,
-        required:true
+        // required:true
     },
 },{timestamps:true});
 

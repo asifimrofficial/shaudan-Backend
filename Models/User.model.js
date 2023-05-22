@@ -24,10 +24,6 @@ const userSchema = new mongoose.Schema({
         ref: 'Contact',
         required: true,
     },
-    CNIC: {
-        type: String,
-        required: true,
-    },
     DOB: {
         type: Date,
         required: true,
