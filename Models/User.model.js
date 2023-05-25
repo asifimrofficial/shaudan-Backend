@@ -14,11 +14,11 @@ const userSchema = new mongoose.Schema({
         ref: 'Account',
         required: true,
     },
-    address: {
-        type:mongoose.Schema.Types.ObjectId,
-        ref: 'Address',
-        required: true,
-    },
+    // address: {
+    //     type:mongoose.Schema.Types.ObjectId,
+    //     ref: 'Address',
+    //     // required: true,
+    // },
     contact: {
         type:mongoose.Schema.Types.ObjectId,
         ref: 'Contact',
@@ -31,7 +31,13 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         required: true,
-    }
+    },
+    images: 
+        {
+            url: String,
+            public_id: String
+        }
+    ,
 }, {timestamps: true});
 
 

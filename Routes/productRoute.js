@@ -4,7 +4,6 @@ const Product = require('../Models/Product.model');
 const Price = require('../Models/Price.model');
 const createError = require('http-errors');
 const {verifyAccessToken} = require('../Helpers/jwtHelper');
-const {uploads}=require('../utils/cloudinary');
 const uploadImages=require('../utils/imageUploader');
 const upload=require('../utils/multer');
 router.get('/', async (req, res, next) => {
@@ -58,7 +57,7 @@ router.post('/post' ,upload.array('image', 2),async (req, res, next) => {
             "name": req.body.name,
             "name":"abcef",
             "category": req.body.category,
-           //"price": savedPriceItem._id,
+            "price": savedPriceItem._id,
             "quantity": req.body.quantity,
             "description": req.body.description,
             "images": uploadedImages,
@@ -74,25 +73,39 @@ router.post('/post' ,upload.array('image', 2),async (req, res, next) => {
         next(error);
     }
 });
+
+//TODO: Update product
+
 router.put('/:id', async (req, res, next) => {
     try {
+        let uploadedImages;
+        const files = req.files;
+        const newpriceobject= req.body.price;
+        const Oldproduct= await findById(req.params.id);
+        if (!Product) { throw createError.NotFound('Product not found') }
+       
+            uploadedImages = await uploadImages(files);
         
-        const product = await Product.findByIdAndUpdate(
-            req.params.id
-            ,
-            {
+
+
+        const product = new Product({
             "name": req.body.name,
+            "name":"abcef",
             "category": req.body.category,
-            "price": req.body.price,
+           //"price": savedPriceItem._id,
             "quantity": req.body.quantity,
             "description": req.body.description,
-            "images": req.body.images,
+            "images": uploadedImages,
             "tags": req.body.tags
-            }, { new: true }
-        );
-        if (!product) { throw createError.NotFound('Product not found') }
-        res.status(200).send(product);
 
+        });
+
+        const savedProduct = await product.save();
+        if (!savedProduct) { throw createError[400]("Product not saved to database") }
+           
+            res.status(200).send(product);
+
+        
 
     } catch (error) {
         next(error);
@@ -134,13 +147,3 @@ router.get('/get/tags', async (req, res, next) => {
 
 module.exports = router;
 
-//write dummy json data to post product
-// {
-//     "name": "product 1",
-//     "category": "5f9e3b7b9d9b3e1f0c3b3b1e",
-//     "price": 100,
-//     "quantity": 10,
-//     "description": "this is product 1",
-//     "images": "https://picsum.photos/200/300",
-//     "tags": ["tag1", "tag2"]
-// }

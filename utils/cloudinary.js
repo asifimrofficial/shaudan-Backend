@@ -5,7 +5,7 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SCERET
 });
 
-exports.uploads = (file) => {
+const uploads = (file) => {
     return new Promise(resolve => {
         cloudinary.uploader.upload(file, (result) => {
             resolve({url: result.url, id: result.public_id})
@@ -15,4 +15,17 @@ exports.uploads = (file) => {
     })
 }
 
+async function deleteProductImages(imageIds) {
+    try {
+      const deletionPromises = imageIds.map((imageId) => cloudinary.uploader.destroy(imageId));
+      const deletionResults = await Promise.all(deletionPromises);
+      console.log(deletionResults);
+      return deletionResults;
+    } catch (error) {
+      console.error(error);
+      throw new Error('Failed to delete product images');
+    }
+  }
+
+  module.exports = {deleteProductImages,uploads};
     

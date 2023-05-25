@@ -3,6 +3,8 @@ const router= express.Router();
 const User= require('../Models/Adress.model');
 const createError=require('http-errors')
 const ageCalculator = require('../Helpers/ageCalculator');
+const uploadImage=require('../utils/imageUploader');
+const upload=require('../utils/multer');
 router.get('/:id',async(req,res,next)=>{
     try {       
         const user= await User.findById(req.params.id).populate('account');;
@@ -16,25 +18,29 @@ router.get('/:id',async(req,res,next)=>{
     }
 });
 
-router.post('/postUser',async(req,res,next)=>{
+router.post('/',upload.array('image', 1),async(req,res,next)=>{
     try {
 
 
         const age = ageCalculator(req.body.DOB);
-
+        const files = req.files;
+        const uploadedImages = await uploadImage(files);
+        console.log(uploadedImages);
         const user = new User({
            name:req.body.name,
            age:age,
            account:req.body.account,
-           address: req.body.address,
+          // address: req.body.address,
            contact:req.body.contact,
            DOB:req.body.DOB,
+            image:uploadedImages[0].url,
            role:req.body.role,
         });
 
         const savedUser= await user.save();
         if(!savedUser)
         {
+
             throw createError[500]('User not saved');
         }
         res.send(user);
@@ -67,7 +73,7 @@ router.put('/:id',async(req,res,next)=>{
                 name:req.body.name,
                 age:req.body.age,
                 account:req.body.account,
-                address: req.body.address,
+               // address: req.body.address,
                 DOB:req.body.DOB,   
             },{new:true}
         )

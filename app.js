@@ -36,7 +36,7 @@ res.send('hi from post');
 
 app.use('/auth', authRoute);
 app.use('/user', userRoute);
-// app.use('/address',addressRoute);
+//app.use('/address',addressRoute);
 app.use('/contact',contactRoute);
 app.use('/location',locationRoute)
 app.use('/product',productRoute);
