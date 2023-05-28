@@ -1,10 +1,11 @@
 const express = require('express');
 const router= express.Router();
-const User= require('../Models/Adress.model');
+const User= require('../Models/User.model');
 const createError=require('http-errors')
 const ageCalculator = require('../Helpers/ageCalculator');
 const uploadImage=require('../utils/imageUploader');
 const upload=require('../utils/multer');
+const {uploads}=require('../utils/cloudinary');
 router.get('/:id',async(req,res,next)=>{
     try {       
         const user= await User.findById(req.params.id).populate('account');;
@@ -18,14 +19,29 @@ router.get('/:id',async(req,res,next)=>{
     }
 });
 
-router.post('/',upload.array('image', 1),async(req,res,next)=>{
+router.post('/',/*upload.single('image')*/upload.array('image', 1),async(req,res,next)=>{
     try {
 
+        if(!req.files){
+            return res.status(400).send({message: 'Please upload a file'});
+        }
 
         const age = ageCalculator(req.body.DOB);
         const files = req.files;
+        console.log("loging files  "+files);
+        // const uploadedImage  =await Promise.all(
+        //     files.map(async (file) => {
+        //       const result = await uploads(file.path);
+        //       return result;
+        //     })
+        //   );
+
         const uploadedImages = await uploadImage(files);
-        console.log(uploadedImages);
+        if(!uploadedImages){
+            return res.status(400).send({message: 'Error in image upload'});
+        }
+        console.log("in uploadeded images   "+uploadedImages[0]);
+        // console.log(req.body);
         const user = new User({
            name:req.body.name,
            age:age,
@@ -33,19 +49,20 @@ router.post('/',upload.array('image', 1),async(req,res,next)=>{
           // address: req.body.address,
            contact:req.body.contact,
            DOB:req.body.DOB,
-            image:uploadedImages[0].url,
+           image:uploadedImages,
            role:req.body.role,
         });
-
+        console.log(user);
         const savedUser= await user.save();
         if(!savedUser)
         {
 
-            throw createError[500]('User not saved');
+            return res.status(400).send({message: 'Error in saving user'});
         }
         res.send(user);
   
     } catch (error) {
+        console.log("error in user post"+error.trace);
      next(error);   
     }
 });
@@ -102,3 +119,4 @@ router.get('/count', async (req, res,next) =>{
 });
 
 module.exports=router;
+

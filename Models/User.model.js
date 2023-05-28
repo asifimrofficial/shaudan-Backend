@@ -1,5 +1,5 @@
+const { required } = require('joi');
 const mongoose = require('mongoose');
-const cryptojs = require('crypto-js');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -14,11 +14,11 @@ const userSchema = new mongoose.Schema({
         ref: 'Account',
         required: true,
     },
-    // address: {
-    //     type:mongoose.Schema.Types.ObjectId,
-    //     ref: 'Address',
-    //     // required: true,
-    // },
+    address: {
+        type:mongoose.Schema.Types.ObjectId,
+        ref: 'Address',
+        // required: true,
+    },
     contact: {
         type:mongoose.Schema.Types.ObjectId,
         ref: 'Contact',
@@ -32,10 +32,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    images: 
+    image: 
         {
             url: String,
-            public_id: String
+            public_id: String,
+            // required    : true
         }
     ,
 }, {timestamps: true});

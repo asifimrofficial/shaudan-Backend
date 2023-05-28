@@ -6,6 +6,7 @@ const createError = require('http-errors');
 const {verifyAccessToken} = require('../Helpers/jwtHelper');
 const uploadImages=require('../utils/imageUploader');
 const upload=require('../utils/multer');
+const {uploads}=require('../utils/cloudinary');
 router.get('/', async (req, res, next) => {
     try {
         const productList = await Product.find();
@@ -40,7 +41,18 @@ router.get('/', async (req, res, next) => {
 router.post('/post' ,upload.array('image', 2),async (req, res, next) => {
     try {
         const files = req.files;
-        const uploadedImages = await uploadImages(files);
+        const uploadedImages =await Promise.all(
+            files.map(async (file) => {
+              const result = await uploads(file.path);
+              return result;
+            })
+          );
+          console.log(uploadedImages[0]);
+          if(!uploadedImages){
+            return res.status(400).send({message: 'Error in image upload'});
+          }
+
+        // const uploadedImages = await uploadImages(files);
 
         const priceobject= req.body.price;
         const priceitem = new Price({
