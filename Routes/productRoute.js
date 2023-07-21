@@ -3,25 +3,25 @@ const router = express.Router();
 const Product = require('../Models/Product.model');
 const Price = require('../Models/Price.model');
 const createError = require('http-errors');
-const {verifyAccessToken} = require('../Helpers/jwtHelper');
+const {verifyAccessToken, verfiyRefreshToken} = require('../Helpers/jwtHelper');
 const uploadImages=require('../utils/imageUploader');
 const upload=require('../utils/multer');
-const {uploads}=require('../utils/cloudinary');
-router.get('/', async (req, res, next) => {
-    try {
-        const productList = await Product.find();
-        if (!productList) { throw createError.NotFound('Product not found') }
-        res.status(200).send({message: "success",productList});
-    } catch (error) {
-        next(error);
-    }
+const {deleteProductImages,uploads}=require('../utils/cloudinary');
+// router.get('/', async (req, res, next) => {
+//     try {
+//         const productList = await Product.find();
+//         if (!productList) { throw createError.NotFound('Product not found') }
+//         res.status(200).send({message: "success",productList});
+//     } catch (error) {
+//         next(error);
+//     }
 
-});
+// });
 router.get('/:id', async (req, res, next) => {
     try {
         const product = await Product.findById(req.params.id).populate('price');
         if (!product) { throw createError.NotFound('Product not found') }
-        res.status(200).send(product);
+        res.status(200).send({success:true,data:product,message:"Product found"});
     } catch (error) {
         next(error);
     }
@@ -31,14 +31,14 @@ router.get('/', async (req, res, next) => {
     try {
         const product = await Product.find().populate('price');
         if (!product) { throw createError.NotFound('Products not found') }
-        res.status(200).send(product);``
+        res.status(200).send({success:true,data:product,message:"Product found"});
     } catch (error) {
         next(error);
     }
 
 });
 
-router.post('/post' ,upload.array('image', 2),async (req, res, next) => {
+router.post('/' ,verifyAccessToken,upload.array('images', 10),async (req, res, next) => {
     try {
         const files = req.files;
         const uploadedImages =await Promise.all(
@@ -51,9 +51,6 @@ router.post('/post' ,upload.array('image', 2),async (req, res, next) => {
           if(!uploadedImages){
             return res.status(400).send({message: 'Error in image upload'});
           }
-
-        // const uploadedImages = await uploadImages(files);
-
         const priceobject= req.body.price;
         const priceitem = new Price({
             "price": priceobject.price,
@@ -79,7 +76,7 @@ router.post('/post' ,upload.array('image', 2),async (req, res, next) => {
 
         const savedProduct = await product.save();
         if (!savedProduct) { throw createError[400]("Product not saved to database") }
-        res.status(200).send(savedProduct);
+        res.status(200).send({success:true,data:savedProduct,message:"Product created"});
    }
     } catch (error) {
         next(error);
@@ -88,7 +85,7 @@ router.post('/post' ,upload.array('image', 2),async (req, res, next) => {
 
 //TODO: Update product
 
-router.put('/:id', async (req, res, next) => {
+router.put('/:id',verifyAccessToken, async (req, res, next) => {
     try {
         let uploadedImages;
         const files = req.files;
@@ -115,7 +112,7 @@ router.put('/:id', async (req, res, next) => {
         const savedProduct = await product.save();
         if (!savedProduct) { throw createError[400]("Product not saved to database") }
            
-            res.status(200).send(product);
+            res.status(200).send({success:true,data:product,message:"Product Updated`"});
 
         
 
@@ -125,9 +122,10 @@ router.put('/:id', async (req, res, next) => {
 
 
 });
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id',verifyAccessToken, async (req, res, next) => {
     try {
         const product = await Product.findByIdAndDelete(req.params.id);
+        console.log(product);
         if (!product) { throw createError[400]('Product not Deleted') }
         res.status(200).send({ success: true, message: "Product deleted" });
     } catch (error) {
@@ -137,21 +135,21 @@ router.delete('/:id', async (req, res, next) => {
 
 });
 // get count of products
-router.get('/get/count', async (req, res, next) => {
+router.get('/get/count',verfiyRefreshToken, async (req, res, next) => {
     try {
         const productCount = await Product.countDocuments((count) => count);
         if (!productCount) { throw createError[400]('Product not found') }
-        res.status(200).send({ count: productCount });
+        res.status(200).send({success:true,data:productCount,message:"Product found"});
     } catch (error) {
         next(error);
     }
 });
 //get product by tags
-router.get('/get/tags', async (req, res, next) => {
+router.get('/get/tags',verifyAccessToken, async (req, res, next) => {
     try {
-        const products = await Product.find({ tags: req.body.tags });
+        const productTags = await Product.find({ tags: req.body.tags });
         if (!product) { throw createError[400]('Product not found') }
-        res.status(200).send(products);
+        res.status(200).send({success:true,data:productTags,message:"Product found"});
     } catch (error) {
         next(error);
     }

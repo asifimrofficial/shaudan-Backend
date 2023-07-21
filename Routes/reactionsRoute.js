@@ -3,7 +3,7 @@ const router = express.Router();
 const createError = require('http-errors');
 const Reaction = require('../Models/Reaction.model');
 
-router.get('/', async (req, res, next) => {
+router.get('/',verifyAccessToken, async (req, res, next) => {
     try {
         const result = await Reaction.find();
         if (!result) throw createError.NotFound();
@@ -14,7 +14,7 @@ router.get('/', async (req, res, next) => {
 }   
 );
 
-router.get('/:id', async (req, res, next) => {
+router.get('/:id',verifyAccessToken, async (req, res, next) => {
     try {
         const result = await Reaction.findById(req.params.id);
         if (!result) throw createError.NotFound();
@@ -25,7 +25,7 @@ router.get('/:id', async (req, res, next) => {
 }
 );
 
-router.post('/', async (req, res, next) => {
+router.post('/',verifyAccessToken, async (req, res, next) => {
     try {
         const reaction = new Reaction(
             {
@@ -42,7 +42,7 @@ router.post('/', async (req, res, next) => {
         next(error);
     }
 });
-router.put('/:id', async (req, res, next) => {
+router.put('/:id',verifyAccessToken, async (req, res, next) => {
     try {
         const result = await Reaction.findByIdAndUpdate(
             req.params.id,

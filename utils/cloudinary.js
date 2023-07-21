@@ -15,6 +15,17 @@ const uploads = (file) => {
             folder: "ProductImages"})
     })
 }
+const uploadUserImageToCloudinary = (file) => {
+  return new Promise(resolve => {
+      cloudinary.uploader.upload(file, (result) => {
+          
+          resolve({url: result.url, id: result.public_id})
+      }, {
+          resource_type: "auto",
+          folder: "Users"})
+  })
+}
+
 
 async function deleteProductImages(imageIds) {
     try {
@@ -28,5 +39,5 @@ async function deleteProductImages(imageIds) {
     }
   }
 
-  module.exports = {deleteProductImages,uploads};
+  module.exports = {deleteProductImages,uploads,uploadUserImageToCloudinary};
     

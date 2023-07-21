@@ -1,5 +1,6 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 const createError = require('http-errors')
 require('dotenv').config()
 
@@ -16,10 +17,12 @@ const contactRoute = require('./Routes/contactRoute')
 const locationRoute = require('./Routes/locationRoute')
 const productRoute = require('./Routes/productRoute')
 const orderRoute = require('./Routes/ordersRoute')
+const CategoryRoute= require('./Routes/categoryRoute')
 require('./Helpers/init_mongo');
 const {verifyAccessToken}= require('./Helpers/jwtHelper')
 
 const app = express()
+app.use(cors())
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
@@ -39,20 +42,24 @@ app.use('/users', userRoute);
 //app.use('/address',addressRoute);
 app.use('/contact',contactRoute);
 app.use('/location',locationRoute)
-app.use('/product',productRoute);
+app.use('/products',productRoute);
  app.use('/order',orderRoute);
+//  app.use('/category',CategoryRoute);
+
+ 
 //error handler middleware
 app.use((err, req, res, next)=>{
     res.status(err.status || 500)
     res.send({
         error:{
             status: err.status || 500,
+            success:false,
             message: err.message
         }
     })
 });
 
 
-app.listen(process.env.PORT , ()=>{
+app.listen(process.env.PORT|| 3000 , ()=>{
     console.log(`server running on http://${process.env.PORT}/ on process ${process.pid}`);
 })

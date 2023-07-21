@@ -8,19 +8,20 @@ const productSchema = new mongoose.Schema({
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
-        // required: true,
+        required: true,
     },
     price: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Price',
-        // required: true,
+        required: true,
     },
     quantity: {
         type: Number,
-        // required: true,
+        required: true,
     },
     description: {
         type: String,
+        maxlength: 1000,
     },
     images: [
         {
@@ -28,6 +29,12 @@ const productSchema = new mongoose.Schema({
             public_id: String
         }
     ],
+    WholeSaler:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'WholeSaler',
+        required: true,
+    },
+
     tags: [
           {
             type: String,

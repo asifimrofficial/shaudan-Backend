@@ -3,8 +3,8 @@ const router = express.Router();
 const Order = require('../Models/Order.model');
 const OrderItem = require('../Models/OrderItems.model');
 const createError = require('http-errors');
-
-router.get('/', async (req, res, next) => {
+const {verifyAccessToken, verfiyRefreshToken} = require('../Helpers/jwtHelper');
+router.get('/',verfiyRefreshToken, async (req, res, next) => {
     try {
         const orderList = await Order.find();
         if (!orderList) { throw createError.NotFound('Orders not found') }
@@ -13,7 +13,7 @@ router.get('/', async (req, res, next) => {
         next(error);
     }
 });
-router.get('/:id', async (req, res, next) => {
+router.get('/:id',verifyAccessToken, async (req, res, next) => {
     try {
         const order = await Order.findById(req.params.id).populate('orderItems').populate('shippingAddress').populate('billingAddress').populate('retailer').populate('contact');
         if (!order) { throw createError.NotFound('Order not found') }
@@ -23,7 +23,7 @@ router.get('/:id', async (req, res, next) => {
     }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/',verifyAccessToken, async (req, res, next) => {
     try {
             const orderItems = Promise.all(req.body.orderItems.map(async (orderItem) => {
                 const newOrderItem = new OrderItem({
@@ -58,7 +58,7 @@ router.post('/', async (req, res, next) => {
         next(error);
     }
 });
-router.put('/:id', async (req, res, next) => {
+router.put('/:id',verifyAccessToken, async (req, res, next) => {
     try {
         const order = await Order.findByIdAndUpdate(
             req.params.id,
@@ -78,7 +78,7 @@ router.put('/:id', async (req, res, next) => {
 
 
 });
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id',verifyAccessToken, async (req, res, next) => {
     try {
         const order = await Order.findByIdAndDelete(req.params.id);
         if (!order) { throw createError[400]('order not Deleted') }

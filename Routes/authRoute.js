@@ -3,14 +3,9 @@ const router = express.Router()
 const createError = require('http-errors')
 const Account = require('../Models/Account.model');
 const { authSchema } = require('../Helpers/validationSchema');
-const { signAccessToken, signRefreshToken, verfiyRefreshToken } = require('../Helpers/jwtHelper');
+const { verifyAccessToken,signAccessToken, signRefreshToken, verfiyRefreshToken, } = require('../Helpers/jwtHelper');
 // const cryptojs = require('crypto-js');
 const bcrypt = require('bcrypt');
-
-router.get('/get', async (req, res, next) => {
-    console.log(req.headers['authorization']);
-    res.send('hi from get');
-})
 
 router.post('/signup', async (req, res, next) => {
     try {
@@ -18,12 +13,12 @@ router.post('/signup', async (req, res, next) => {
 
         const result = await authSchema.validateAsync(body);
         if (!result) {
-            throw createError.BadRequest();
+            res.status(400).send({ success: false, message: "invalid data" });
         }
        
         const doesExist = await Account.findOne({ email: result.email })
         if (doesExist) {
-            throw createError.Conflict(`${email} is already registered`)
+            return res.send({ success: false, message: "email already exists" });
         }
         else {
             bcrypt.hash(result.password, 10, async (err, hash) => {
@@ -41,7 +36,7 @@ router.post('/signup', async (req, res, next) => {
                     const savedAccount = await account.save();
                      const refreshToken = await signRefreshToken(savedAccount.id);
                     const accessToken = await signAccessToken(savedAccount.id);
-            res.send({ accessToken, refreshToken });
+            res.send({ success: true, message: "User created Successfully", data: { accesstoken: accessToken,  account_id: savedAccount._id } });
                 }
             });
 
@@ -56,10 +51,10 @@ router.post('/signup', async (req, res, next) => {
 router.post('/login', async (req, res, next) => {
     try {
 
-        console.log(req.body);
+        // console.log(req.body);
         const result = await authSchema.validateAsync(req.body);
         if (!result) {
-            throw createError.BadRequest();
+            res.status(400).send({ success: false, message: "invalid data" });
         } else {
             const account = await Account.findOne({ email: result.email });
             console.log(`account is${account}`);
@@ -85,14 +80,19 @@ router.post('/login', async (req, res, next) => {
 
 
              bcrypt.compare(result.password, account.hashedPassword,async (err, isMatch) => {
-                if (err) throw createError.InternalServerError();
+                if (err) return res.status(400).send({ success: false, message: err.message });
                 if (!isMatch) {
                     account.loginAttempts += 1;
                     account.save();
                     return res.status(401).send({ success: false, message: "Username/password not valid" });
                 } else {
+                    account.loginAttempts=0
+                    const account_saved=await account.save()
+                    if(account_saved)
+                    {
                     const accessToken = await signAccessToken(account.id);
-                    return res.status(200).send({ accessToken,account:account });
+                    return res.status(200).send({ success:true,message:"User found",data:{ accesstoken:accessToken,account_id:account._id} });
+                    }
                 }
             });
         }
@@ -106,7 +106,7 @@ router.post('/login', async (req, res, next) => {
     }
 });
 
-router.post('/refresh-token', async (req, res, next) => {
+router.post('/refresh-token',verifyAccessToken, async (req, res, next) => {
     const { refreshToken } = req.body;
     try {
         if (!refreshToken) throw createError.BadRequest();
@@ -122,15 +122,15 @@ router.post('/refresh-token', async (req, res, next) => {
 
 });
 
-router.patch('/update-password', verfiyRefreshToken, async (req, res, next) => {
+router.patch('/update-password', verifyAccessToken, async (req, res, next) => {
     try {
         const password = req.body.password;
         const account = await Account.findById(req.payload.aud);
-        if (!account) { throw createError[400]('account not found') }
+        if (!account) { return res.status(404).send({ success: false, message: "account not found" });}
         const oldPassword = cryptojs.AES.decrypt(account.hashedPassword, account.salt).toString(cryptojs.enc.Utf8);
         const isMatch = account.isValidPassword(oldPassword);
         if (!isMatch) {
-            throw createError.Unauthorized('Username/password not valid');
+            return res.status(401).send({ success: false, message: "old password is not correct" });
         }
         const result = await authSchema.validateAsync(req.body);
         const salt = cryptojs.lib.WordArray.random(16).toString();
@@ -148,7 +148,7 @@ router.patch('/update-password', verfiyRefreshToken, async (req, res, next) => {
 
 
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id',verifyAccessToken, async (req, res, next) => {
     try {
         const account = await Account.findByIdAndDelete(req.params.id);
         if (!account) { throw createError[400]('account not Deleted') }

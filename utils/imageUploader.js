@@ -1,5 +1,5 @@
 const {uploads}=require('../utils/cloudinary');
-
+const cloudinary = require('cloudinary').v2;
 // module.exports=async(files)=>{
 //    return await Promise.all(
 //         files.map(async (err,file) => {
@@ -9,15 +9,24 @@ const {uploads}=require('../utils/cloudinary');
 //         })
 //       );
 // }
-
-async function uploadImage(file) {
+const uploadImage =async function uploadImageToCloudinary(file) {
   try {
-    const result = await cloudinary.uploader.upload(file.path);
-    console.log('Image uploaded:', result.url);
-    return result;
+    const result = await cloudinary.v2.uploader.upload(file.path);
+    console.log('Image uploaded to Cloudinary:', result.secure_url);
+    return result.secure_url;
   } catch (error) {
-    console.error('Error uploading image:', error);
+    console.error('Error uploading image to Cloudinary:', error.message);
+    throw error;
   }
 }
+module.exports=uploadImage;
+// async function uploadImage(file) {
+//   try {
+//     const result = await cloudinary.uploader.upload(file.path);
+//     console.log('Image uploaded:', result.url);
+//     return result;
+//   } catch (error) {
+//     console.error('Error uploading image:', error);
+//   }
+// }
 
-module.exports = uploadImage;

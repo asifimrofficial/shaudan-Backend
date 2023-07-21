@@ -2,7 +2,7 @@ const express = require('express');
 const router= express.Router();
 const Store= require('../Models/Store.model');
 const createError=require('http-errors');
-
+const {verifyAccessToken, verfiyRefreshToken} = require('../Helpers/jwtHelper');
 router.get('/:id',async(req,res,next)=>{
 try {
     const store=await Store.findById(req.params.id);
@@ -15,7 +15,7 @@ catch (error) {
 
 });
 
-router.post('/',async(req,res,next)=>{
+router.post('/',verifyAccessToken,async(req,res,next)=>{
     try {
         const doesExist = await Store.find({name:req.body.owner});
         if(doesExist){throw createError.Conflict(`${req.body.owner} already has a store`)};
@@ -40,7 +40,7 @@ router.post('/',async(req,res,next)=>{
     }
 });
 
-router.put('/:id',async(req,res,next)=>{
+router.put('/:id',verifyAccessToken,async(req,res,next)=>{
     try {
         const store= await Store.findByIdAndUpdate(
             req.params.id
@@ -66,7 +66,7 @@ router.put('/:id',async(req,res,next)=>{
     }
 });
 
-router.delete('/:id',async(req,res,next)=>{
+router.delete('/:id',verifyAccessToken,async(req,res,next)=>{
     try {
         const store= await Store.findByIdAndDelete(req.params.id);
         if(!store){throw createError.NotFound('store not found')}

@@ -34,6 +34,7 @@ module.exports={
         const authHeader = req.headers['authorization']
         const bearerToken = authHeader.split(' ');
         const token= bearerToken[1];
+        console.log(token);
         jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,req,res)=>{
             if(err){
                 if(err.name === 'JsonWebTokenError'){
@@ -51,7 +52,7 @@ module.exports={
             }
             const secret =  process.env.REFRESH_TOKEN_SECRET;
             const options={
-                expiresIn: "1y",
+                expiresIn: "1m",
                 issuer: "shaudan.com",
                 audience: userId
             }
@@ -67,8 +68,7 @@ module.exports={
     verfiyRefreshToken: (refreshToken)=>{
         return new Promise((resolve,reject)=>{
             jwt.verify(refreshToken,process.env.REFRESH_TOKEN_SECRET,(err,req,res)=>{
-                if(err){return reject(createError.Unauthorized())}
-    
+                if(err){return res.send(err.message)}
                 const userId= payload.aud;
                 resolve(userId);
             })

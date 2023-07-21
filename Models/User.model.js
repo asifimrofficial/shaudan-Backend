@@ -35,10 +35,9 @@ const userSchema = new mongoose.Schema({
     image: 
         {
             url: String,
-            public_id: String,
-            // required    : true
-        }
-    ,
+            id: String
+        },
+    
 }, {timestamps: true});
 
 
