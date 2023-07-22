@@ -18,6 +18,9 @@ const locationRoute = require('./Routes/locationRoute')
 const productRoute = require('./Routes/productRoute')
 const orderRoute = require('./Routes/ordersRoute')
 const CategoryRoute= require('./Routes/categoryRoute')
+const WholeSalerRoute = require('./Routes/wholeSalerRoutes')
+const RetailerRoute = require('./Routes/retailerRoutes')
+
 require('./Helpers/init_mongo');
 const {verifyAccessToken}= require('./Helpers/jwtHelper')
 
@@ -39,24 +42,21 @@ res.send('hi from post');
 
 app.use('/auth', authRoute);
 app.use('/users', userRoute);
-//app.use('/address',addressRoute);
+app.use('/address',addressRoute);
 app.use('/contact',contactRoute);
 app.use('/location',locationRoute)
 app.use('/products',productRoute);
  app.use('/order',orderRoute);
-//  app.use('/category',CategoryRoute);
+ app.use('/category',CategoryRoute);
 
  
 //error handler middleware
 app.use((err, req, res, next)=>{
-    res.status(err.status || 500)
-    res.send({
-        error:{
-            status: err.status || 500,
-            success:false,
-            message: err.message
-        }
-    })
+    res.status(err.status || 500).send({
+        message: err.message,
+        data: "",
+        success: false
+    });
 });
 
 

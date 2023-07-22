@@ -7,9 +7,9 @@ const Category = require('../Models/Category.model');
 router.get('/', async (req, res) => {
     try {
         const categories = await Category.find();
-        res.status(200).send({message: "Success", data: categories});
+        res.status(200).send({message: "Categories found",succrss:true, data: categories});
     } catch (err) {
-        res.status(200).send({message: err, data: ""});
+        next(err)
     }
 }
 );
@@ -20,9 +20,9 @@ router.post('/', async (req, res) => {
     });
     try {
         const savedCategory = await category.save();
-        res.status(200).send({message: "Success", data: savedCategory});
+        res.status(200).send({message: "Category Added Successfull",success:true, data: savedCategory});
     } catch (err) {
-        res.status(200).send({message: err, data: ""});
+        next(err)
     }
 }
 );

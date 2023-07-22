@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const cryptojs = require('crypto-js');
 
 const storeSchema = new mongoose.Schema({
     name: {

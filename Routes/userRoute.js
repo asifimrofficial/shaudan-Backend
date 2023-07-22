@@ -2,6 +2,7 @@ const express = require('express');
 const router= express.Router();
 const User= require('../Models/User.model');
 const Address= require('../Models/Adress.model');
+const Contact= require('../Models/Contact.model');
 const createError=require('http-errors')
 const ageCalculator = require('../Helpers/ageCalculator');
 const uploadImages=require('../utils/imageUploader');
@@ -41,26 +42,72 @@ router.post('/',verifyAccessToken,upload.array('image',1),async(req,res,next)=>{
         if(uploadedImage.length==0){
             return res.status(400).send({success:false,message: 'Error in image upload'});
         }
+       
+            const address = req.body.address;
+            const newAddress = new Address({
+                street: address.street,
+                houseNumber: address.houseNumber,
+                city: address.city,
+                postalCode: address.postalCode,
+                state: address.state,
+                country: address.country,
+                addressType: address.addressType
+              });
+            const savedAddress= await newAddress.save();
+            if(!savedAddress){res.send({success:false,message:"address not saved to database"})}
+            const userAddressId= savedAddress._id;
 
+            const contact = req.body.contact;
+            const UserContact = new Contact({
+                phoneNumber: contact.phoneNumber,
+               socialMedia: contact.socialMedia
+            });
+            const savedContact = await UserContact.save();
+            if(!savedContact){res.send({success:false,message:"contact not saved to database"})}
+            const usercontact_id= savedContact._id;
+      
         const user = new User({
            name:req.body.name,
            age:age,
            account:req.body.account,
-          address: req.body.address,
-           contact:req.body.contact,
+          address: userAddressId,
+           contact:usercontact_id,
            DOB:req.body.DOB,
            image:uploadedImage[0],
            role:req.body.role,
         });
-        console.log(user);
+        const savedUser= await user.save();
 
-        res.send({success:true,message:"user created successfully",data:user});
+        res.send({success:true,message:"user created successfully",data:savedUser});
   
     } catch (error) {
         console.log("error in user post"+error.trace);
      next(error);   
     }
 });
+//write dummy json data for testing of above post api
+// {
+//     "name":"sana",
+//     "age":23,
+//     "account":"60f0a1b3e1b3a71f0c3f0b7f",
+//     "address":{
+//         "street":"street 1",
+//         "houseNumber":"house 1",
+//         "city":"city 1",
+//         "postalCode":"postal 1",
+//         "state":"state 1",
+//         "country":"country 1",
+//         "addressType":"addressType 1"
+//     },
+//     "contact":{
+//         "phoneNumber":"phone 1",
+//         "socialMedia":"social 1"
+//     },
+//     "DOB":"1998-12-12",
+//     "image":"image 1",
+//     "role":"role 1"
+// }
+
 
 router.delete('/:id',verifyAccessToken, async(req,res,next)=>{
     try {

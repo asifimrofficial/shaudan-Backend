@@ -7,16 +7,6 @@ const {verifyAccessToken, verfiyRefreshToken} = require('../Helpers/jwtHelper');
 const uploadImages=require('../utils/imageUploader');
 const upload=require('../utils/multer');
 const {deleteProductImages,uploads}=require('../utils/cloudinary');
-// router.get('/', async (req, res, next) => {
-//     try {
-//         const productList = await Product.find();
-//         if (!productList) { throw createError.NotFound('Product not found') }
-//         res.status(200).send({message: "success",productList});
-//     } catch (error) {
-//         next(error);
-//     }
-
-// });
 router.get('/:id', async (req, res, next) => {
     try {
         const product = await Product.findById(req.params.id).populate('price');
@@ -38,7 +28,7 @@ router.get('/', async (req, res, next) => {
 
 });
 
-router.post('/' ,verifyAccessToken,upload.array('images', 10),async (req, res, next) => {
+router.post('/' ,verifyAccessToken,/*upload.array('images', 10),*/async (req, res, next) => {
     try {
         const files = req.files;
         const uploadedImages =await Promise.all(
@@ -70,7 +60,8 @@ router.post('/' ,verifyAccessToken,upload.array('images', 10),async (req, res, n
             "quantity": req.body.quantity,
             "description": req.body.description,
             "images": uploadedImages,
-            "tags": req.body.tags
+            "tags": req.body.tags,
+            "WholeSaler":req.body.WholeSaler,
 
         });
 
@@ -89,19 +80,25 @@ router.put('/:id',verifyAccessToken, async (req, res, next) => {
     try {
         let uploadedImages;
         const files = req.files;
-        const newpriceobject= req.body.price;
+        const price= req.body.price;
         const Oldproduct= await findById(req.params.id);
-        if (!Product) { throw createError.NotFound('Product not found') }
-       
-            uploadedImages = await uploadImages(files);
+
+        const newprice=new Price({
+            price:price.price,
+            startDate:price.startDate,
+            endDate:price.endDate,
+        });
+        const savedPrice= await newprice.save();
+        if(!savedPrice){res.send({success:false,message:"Price not saved to database"})}
         
 
-
+        if (!Product) { throw createError.NotFound('Product not found') }
+        uploadedImages = await uploadImages(files);
         const product = new Product({
             "name": req.body.name,
             "name":"abcef",
             "category": req.body.category,
-           //"price": savedPriceItem._id,
+           "price":savedPrice._id,
             "quantity": req.body.quantity,
             "description": req.body.description,
             "images": uploadedImages,
@@ -122,6 +119,29 @@ router.put('/:id',verifyAccessToken, async (req, res, next) => {
 
 
 });
+//write dummy data for post product for above api
+//{
+//     "name": "product 1",
+//     "category": "5f9e1b7b9c9b7b1e0c3b3b1c",
+//     "price": {
+//         "price": 100,
+//         "startDate": "2020-10-30T00:00:00.000Z",
+//         "endDate": "2020-10-30T00:00:00.000Z"
+//     },
+//     "quantity": 10,
+//     "description": "this is product 1",
+//     "images": [
+//         "https://res.cloudinary.com/dxqnb8xjb/image/upload/v1604064179/Products/2020-10-30T00:00:00.000Z/1604064178990-IMG_20191231_123456.jpg.jpg",
+//         "https://res.cloudinary.com/dxqnb8xjb/image/upload/v1604064179/Products/2020-10-30T00:00:00.000Z/1604064178990-IMG_20191231_123456.jpg.jpg"
+//     ],
+//     "tags": [
+//         "tag1",
+//         "tag2"
+//     ]
+
+// }
+
+
 router.delete('/:id',verifyAccessToken, async (req, res, next) => {
     try {
         const product = await Product.findByIdAndDelete(req.params.id);
