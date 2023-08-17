@@ -57,9 +57,8 @@ router.post('/login', async (req, res, next) => {
             res.status(400).send({ success: false, message: "invalid data" });
         } else {
             const account = await Account.findOne({ email: result.email });
-            console.log(`account is${account}`);
             if (!account) {
-                return res.status(404).send({ success: false, message: "account not found" });
+                return res.status(404).send({ success: false, message: "Username/password not valid" });
             }
             if (account.loginAttempts >= 3) {
                 account.isLocked = true;

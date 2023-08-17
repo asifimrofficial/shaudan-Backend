@@ -17,25 +17,20 @@ const storeSchema = new mongoose.Schema({
     address: {
         type:mongoose.Schema.Types.ObjectId,
         ref: 'Address',
-        required: true,
+        // required: true,
     },
     contact: {
         type:mongoose.Schema.Types.ObjectId,
         ref: 'Contact',
-        required: true,
-    },
-    owner: {
-        type:mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
+        // required: true,
     },
     status: {
         type: String,
-        required: true,
+        // required: true,
     },
     storeType: {
         type: String,
-        required: true,
+        // required: true,
     },
     reviews: {
         type:mongoose.Schema.Types.ObjectId,

@@ -4,16 +4,16 @@ const router = express.Router();
 const Retailer = require('../Models/Retailer.model');
 const { verifyAccessToken } = require('../Helpers/jwtHelper');
 // Get all retailers
-router.get('/', verifyAccessToken,async (req, res) => {
+router.get('/:id', verifyAccessToken,async (req, res,next) => {
     try {
-        const retailers = await Retailer.find();
-        res.status(200).send({message: "Retailers found",success:true, data: retailers});
+        const retailer = await Retailer.findOne({user:req.params.id});
+        res.status(200).send({message: "Retailers found",success:true, data: retailer});
     } catch (err) {
         next(err)
     }
 });
 
-router.post('/', verifyAccessToken,async (req, res) => {
+router.post('/', verifyAccessToken,async (req, res,next) => {
     const retailer = new Retailer({
         user: req.body.user
     });

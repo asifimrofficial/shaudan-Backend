@@ -17,20 +17,18 @@ catch (error) {
 
 router.post('/',verifyAccessToken,async(req,res,next)=>{
     try {
-        const doesExist = await Store.find({name:req.body.owner});
-        if(doesExist){throw createError.Conflict(`${req.body.owner} already has a store`)};
+        // const doesExist = await Store.find({name:req.body.owner});
+        // if(doesExist){throw createError.Conflict(`${req.body.owner} already has a store`)};
         const store=new Store({
             name:req.body.name,
-            about:req.body.about,
-            address:req.body.address,
-            coverPicture:req.body.coverPicture,
-            logo:req.body.logo,
-            storeType:req.body.storeType,
-            owner:req.body.owner,
-            productCatalog:req.body.productCatalog,
-            reviews:req.body.reviews,
-            status:req.body.status,
-            contact:req.body.contact
+            about:req.body.about||null,
+            address:req.body.address||null,
+            coverPicture:req.body.coverPicture||null,
+            logo:null,
+            storeType:req.body.storeType||null,
+            reviews:req.body.reviews||null,
+            status:req.body.status||null,
+            contact:req.body.contact||null
         });
 
         const saveStore= await store.save();
@@ -60,7 +58,7 @@ router.put('/:id',verifyAccessToken,async(req,res,next)=>{
             },{new:true}
             );
         if(!store){throw createError.NotFound('store not found')}
-            res.status(200).send(store);
+            res.status(200).send({ success:true,data:store,message:"Store updated"});
         } catch (error) {
         next(error);
     }
@@ -70,7 +68,7 @@ router.delete('/:id',verifyAccessToken,async(req,res,next)=>{
     try {
         const store= await Store.findByIdAndDelete(req.params.id);
         if(!store){throw createError.NotFound('store not found')}
-            res.status(200).send(store);
+            res.status(200).send({ success:true,data:store,message:"Store deleted"});
         } catch (error) {
         next(error);
     }

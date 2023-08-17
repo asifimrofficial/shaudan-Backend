@@ -9,10 +9,9 @@ const userSchema = new mongoose.Schema({
     age: {
         type: Number,
     },
-    account: {
-        type: mongoose.Schema.Types.ObjectId,
+    account:{
+        type:mongoose.Schema.Types.ObjectId,
         ref: 'Account',
-        required: true,
     },
     address: {
         type:mongoose.Schema.Types.ObjectId,
@@ -22,11 +21,11 @@ const userSchema = new mongoose.Schema({
     contact: {
         type:mongoose.Schema.Types.ObjectId,
         ref: 'Contact',
-        required: true,
+        // required: true,
     },
     DOB: {
         type: Date,
-        required: true,
+        // required: true,
     },
     role: {
         type: String,

@@ -12,7 +12,7 @@ const {verifyAccessToken, verfiyRefreshToken} = require('../Helpers/jwtHelper');
 const {uploads,uploadUserImageToCloudinary}=require('../utils/cloudinary');
 router.get('/:id',verifyAccessToken,async(req,res,next)=>{
     try {       
-        const user= await User.findById(req.params.id).populate('account');;
+        const user= await User.findOne({account:req.params.id});
         if(!user)
         {
         throw createError.NotFound('user details not found');
@@ -23,27 +23,12 @@ router.get('/:id',verifyAccessToken,async(req,res,next)=>{
     }
 });
 
-router.post('/',verifyAccessToken,upload.array('image',1),async(req,res,next)=>{
+router.post('/',verifyAccessToken,async(req,res,next)=>{
     try {
-
-        if(!req.files){
-            return res.status(400).send({message: 'Please upload a file'});
-        }
-
-        const age = ageCalculator(req.body.DOB);
-        const files = req.files;
-        const uploadedImage  =await Promise.all(
-            files.map(async (file) => {
-              const result = await uploadUserImageToCloudinary(file.path);
-              return result;
-            })
-          );
-
-        if(uploadedImage.length==0){
-            return res.status(400).send({success:false,message: 'Error in image upload'});
-        }
-       
             const address = req.body.address;
+            let userAddressId;
+            let usercontact_id;
+            if(address){
             const newAddress = new Address({
                 street: address.street,
                 houseNumber: address.houseNumber,
@@ -55,27 +40,32 @@ router.post('/',verifyAccessToken,upload.array('image',1),async(req,res,next)=>{
               });
             const savedAddress= await newAddress.save();
             if(!savedAddress){res.send({success:false,message:"address not saved to database"})}
-            const userAddressId= savedAddress._id;
+             userAddressId= savedAddress._id;
+            }
 
             const contact = req.body.contact;
+            if (contact){
             const UserContact = new Contact({
                 phoneNumber: contact.phoneNumber,
                socialMedia: contact.socialMedia
             });
+            
             const savedContact = await UserContact.save();
             if(!savedContact){res.send({success:false,message:"contact not saved to database"})}
-            const usercontact_id= savedContact._id;
-      
+            usercontact_id= savedContact._id;
+        }
+        const age=ageCalculator(req.body.DOB);
         const user = new User({
            name:req.body.name,
-           age:age,
+           age:age || null,
            account:req.body.account,
-          address: userAddressId,
-           contact:usercontact_id,
-           DOB:req.body.DOB,
-           image:uploadedImage[0],
+           address: userAddressId || null,
+           contact:usercontact_id || null,
+           DOB:req.body.DOB||null,
            role:req.body.role,
         });
+
+        
         const savedUser= await user.save();
 
         res.send({success:true,message:"user created successfully",data:savedUser});
@@ -124,16 +114,40 @@ router.delete('/:id',verifyAccessToken, async(req,res,next)=>{
     }
 });
 
-router.put('/:id',verifyAccessToken,async(req,res,next)=>{
+router.post('/update/:id',verifyAccessToken,upload.array('image',1),async(req,res,next)=>{
     try {
+        
+        if(!req.files){
+            next(createError[400]("Please upload an image"))
+        }
+        let uploadedImage;
+        let age;
+        const DOB=req.body.DOB;
+        if(DOB){
+        age = ageCalculator(req.body.DOB);
+        }
+        const files = req.files;
+        if (files){
+         uploadedImage  =await Promise.all(
+            files.map(async (file) => {
+              const result = await uploadUserImageToCloudinary(file.path);
+              return result;
+            })
+          );
+
+        if(uploadedImage.length==0){
+            next(createError[400]("Error occur while saving Images"))
+        }
+        }
         const user= await User.findByIdAndUpdate(
             req.params.id,
             {
                 name:req.body.name,
-                age:req.body.age,
-                account:req.body.account,
-               // address: req.body.address,
-                DOB:req.body.DOB,   
+                age:age||user.age,
+                address: userAddressId || null,
+                contact:usercontact_id || null,
+                DOB:req.body.DOB,
+                role:req.body.role,   
             },{new:true}
         )
         if(!user){

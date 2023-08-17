@@ -9,7 +9,7 @@ const upload=require('../utils/multer');
 const {deleteProductImages,uploads}=require('../utils/cloudinary');
 router.get('/:id', async (req, res, next) => {
     try {
-        const product = await Product.findById(req.params.id).populate('price');
+        const product = await Product.findById(req.params.id);
         if (!product) { throw createError.NotFound('Product not found') }
         res.status(200).send({success:true,data:product,message:"Product found"});
     } catch (error) {
@@ -19,8 +19,8 @@ router.get('/:id', async (req, res, next) => {
 });
 router.get('/', async (req, res, next) => {
     try {
-        const product = await Product.find().populate('price');
-        if (!product) { throw createError.NotFound('Products not found') }
+        const product = await Product.find();
+        if (!product) { throw createError.NotFound('Product not found') }
         res.status(200).send({success:true,data:product,message:"Product found"});
     } catch (error) {
         next(error);
@@ -28,47 +28,24 @@ router.get('/', async (req, res, next) => {
 
 });
 
-router.post('/' ,verifyAccessToken,/*upload.array('images', 10),*/async (req, res, next) => {
+router.post('/' ,verifyAccessToken,async (req, res, next) => {
     try {
-        const files = req.files;
-        const uploadedImages =await Promise.all(
-            files.map(async (file) => {
-              const result = await uploads(file.path);
-              return result;
-            })
-          );
-          console.log(uploadedImages[0]);
-          if(!uploadedImages){
-            return res.status(400).send({message: 'Error in image upload'});
-          }
-        const priceobject= req.body.price;
-        const priceitem = new Price({
-            "price": priceobject.price,
-            "startDate": priceobject.startDate,
-            "endDate": priceobject.endDate,
-        });
-        const savedPriceItem= await priceitem.save();
-        console.log(`${savedPriceItem}`);
-        if (!savedPriceItem||!savedPriceItem) { throw createError[400]("Error occur while saving Price item or Images") }
-       else{
-            
         const product = new Product({
-            "name": req.body.name,
-            "name":"abcef",
+            "title": req.body.title,
             "category": req.body.category,
-            "price": savedPriceItem._id,
+            "price": req.body.price,
             "quantity": req.body.quantity,
             "description": req.body.description,
-            "images": uploadedImages,
+            "images": req.body.images,
             "tags": req.body.tags,
             "WholeSaler":req.body.WholeSaler,
+            'rating':req.body.rating
 
         });
-
         const savedProduct = await product.save();
         if (!savedProduct) { throw createError[400]("Product not saved to database") }
         res.status(200).send({success:true,data:savedProduct,message:"Product created"});
-   }
+   
     } catch (error) {
         next(error);
     }
@@ -78,19 +55,13 @@ router.post('/' ,verifyAccessToken,/*upload.array('images', 10),*/async (req, re
 
 router.put('/:id',verifyAccessToken, async (req, res, next) => {
     try {
-        let uploadedImages;
+        
         const files = req.files;
+        
+       
+        
         const price= req.body.price;
         const Oldproduct= await findById(req.params.id);
-
-        const newprice=new Price({
-            price:price.price,
-            startDate:price.startDate,
-            endDate:price.endDate,
-        });
-        const savedPrice= await newprice.save();
-        if(!savedPrice){res.send({success:false,message:"Price not saved to database"})}
-        
 
         if (!Product) { throw createError.NotFound('Product not found') }
         uploadedImages = await uploadImages(files);
@@ -98,7 +69,7 @@ router.put('/:id',verifyAccessToken, async (req, res, next) => {
             "name": req.body.name,
             "name":"abcef",
             "category": req.body.category,
-           "price":savedPrice._id,
+           "price":savedPrice._id ||product.price,
             "quantity": req.body.quantity,
             "description": req.body.description,
             "images": uploadedImages,
@@ -119,6 +90,8 @@ router.put('/:id',verifyAccessToken, async (req, res, next) => {
 
 
 });
+
+
 //write dummy data for post product for above api
 //{
 //     "name": "product 1",

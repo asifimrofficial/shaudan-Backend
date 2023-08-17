@@ -7,26 +7,17 @@ cloudinary.config({
 
 const uploads = (file) => {
     return new Promise(resolve => {
-        cloudinary.uploader.upload(file, (result) => {
-            
-            resolve({url: result.url, id: result.public_id})
+        cloudinary.uploader.upload(file, (result,error) => {
+          if (error) {
+            reject(error);
+        } else {
+            resolve({ url: result.url, id: result.public_id });
+        }
         }, {
             resource_type: "auto",
-            folder: "ProductImages"})
+            folder: "images"})
     })
 }
-const uploadUserImageToCloudinary = (file) => {
-  return new Promise(resolve => {
-      cloudinary.uploader.upload(file, (result) => {
-          
-          resolve({url: result.url, id: result.public_id})
-      }, {
-          resource_type: "auto",
-          folder: "Users"})
-  })
-}
-
-
 async function deleteProductImages(imageIds) {
     try {
       const deletionPromises = imageIds.map((imageId) => cloudinary.uploader.destroy(imageId));
@@ -39,5 +30,5 @@ async function deleteProductImages(imageIds) {
     }
   }
 
-  module.exports = {deleteProductImages,uploads,uploadUserImageToCloudinary};
+  module.exports = {deleteProductImages,uploads};
     
