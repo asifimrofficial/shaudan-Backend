@@ -14,6 +14,8 @@ const {
 //if product is not in the cart then add the product to the cart
 router.post("/add", verifyAccessToken, async (req, res, next) => {
   try {
+    // IF THERE IS CART THAT HAS Product==NULL THEN DELETE THAT CART
+
     const cart = await Cart.find({ user: req.body.user });
     const existingProduct = await Cart.findOne({ product: req.body.product });
     if (existingProduct) {
@@ -96,7 +98,7 @@ router.get(
 // }
 
 //get all cart items of a user
-router.get("/:id", verifyAccessToken, async (req, res) => {
+router.get("/:id", verifyAccessToken, async (req, res, next) => {
   try {
     const cart = await Cart.find({ user: req.params.id }).populate("product");
     if (cart)
@@ -162,6 +164,7 @@ router.patch(
     }
   }
 );
+
 // url: http://localhost:5000/cart/update_isProductSelectedBool/60b9b0b9e1b9a71e3c9e1b9a
 // Body of /update_isProductSelectedBool is
 // {
@@ -202,7 +205,6 @@ router.patch("/select_all_items/:id", verifyAccessToken, async (req, res) => {
       }
     );
     res
-
       .status(200)
       .send({ message: "Cart item updated", success: true, data: cart });
   } catch (err) {

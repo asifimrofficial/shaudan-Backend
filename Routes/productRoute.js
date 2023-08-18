@@ -7,6 +7,7 @@ const {verifyAccessToken, verfiyRefreshToken} = require('../Helpers/jwtHelper');
 const uploadImages=require('../utils/imageUploader');
 const upload=require('../utils/multer');
 const {deleteProductImages,uploads}=require('../utils/cloudinary');
+
 router.get('/:id', async (req, res, next) => {
     try {
         const product = await Product.findById(req.params.id);
@@ -17,6 +18,9 @@ router.get('/:id', async (req, res, next) => {
     }
 
 });
+//url 
+
+
 router.get('/', async (req, res, next) => {
     try {
         const product = await Product.find();
